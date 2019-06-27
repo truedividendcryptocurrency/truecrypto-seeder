@@ -1,14 +1,14 @@
-litecoin-seeder
+truecrypto-seeder
 ===============
 
-Litecoin-seeder is a crawler for the Litecoin network, which exposes a list
+truecrypto-seeder is a crawler for the TDC network, which exposes a list
 of reliable nodes via a built-in DNS server.
 
 Features:
 * regularly revisits known nodes to check their availability
 * bans nodes after enough failures, or bad behaviour
-* accepts nodes down to v0.5.0 to request new IP addresses from,
-  but only reports good post-v0.6.9 nodes.
+* accepts nodes down to v1.0.0 to request new IP addresses from,
+  and in the future will only report good post-v1.0.3 nodes.
 * keeps statistics over (exponential) windows of 2 hours, 8 hours,
   1 day and 1 week, to base decisions on.
 * very low memory (a few tens of megabytes) and cpu requirements.
@@ -60,3 +60,33 @@ $ iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-port 5353
 
 If properly configured, this will allow you to run dnsseed in userspace, using
 the -p 5353 option.
+
+
+RUNNING AS A SYSTEMD SERVICE ON UBUNTU
+--------------------------------------
+1. Create /etc/systemd/system/truecrypto-seeder.service and customize as needed:
+
+
+[Unit]
+Description=truecrypto dns seeder
+After=network.target
+
+[Service]
+WorkingDirectory=/<LOCATION>/truecrypto-seeder
+ExecStart=/<LOCATION>/truecrypto-seeder/dnsseed -h <HOSTNAME> -n <IP> -m email@mail.com
+Restart=on-failure
+RestartSec=10
+User=root
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=truecrypto-seeder
+
+[Install]
+WantedBy=multi-user.target
+
+
+2. Use the following commands to interact with the service:
+systemctl daemon-reload
+systemctl enable truecrypto-seeder
+systemctl start truecrypto-seeder
+
